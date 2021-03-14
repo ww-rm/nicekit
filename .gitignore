@@ -130,3 +130,7 @@ dmypy.json
 
 # user define
 .vscode/
+tmp/
+*.tmp
+dataset/
+*.zip
