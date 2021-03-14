@@ -14,12 +14,13 @@ def adjustimg(cover, secret):
     s_height, s_width = secret.shape
 
     c_height, c_width = cover.shape
+
     if c_height < s_height:
-        cover = cv2.resize(cover, (s_height, int(c_width*s_height/c_height + 0.5)), interpolation=cv2.INTER_CUBIC)
+        cover = cv2.resize(cover, (int(c_width*s_height/c_height + 0.5), s_height), interpolation=cv2.INTER_CUBIC)
         c_height, c_width = cover.shape
 
     if c_width < s_width:
-        cover = cv2.resize(cover, (int(c_height*s_width/c_width + 0.5), s_width), interpolation=cv2.INTER_CUBIC)
+        cover = cv2.resize(cover, (s_width, int(c_height*s_width/c_width + 0.5)), interpolation=cv2.INTER_CUBIC)
         c_height, c_width = cover.shape
 
     delta_height = c_height - s_height
