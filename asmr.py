@@ -207,7 +207,7 @@ class AsmrSite(XSession):
             return True
 
         res = self.head(url)
-        content_length = int(res.headers["Content-Length"])
+        content_length = int(res.headers.get("Content-Length", 0))
         chunk_size = 1*1024*1024
         chunk_num = math.ceil(content_length / chunk_size)
 
