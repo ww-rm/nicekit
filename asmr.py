@@ -212,7 +212,7 @@ class AsmrSite(XSession):
                 for chunk in res.iter_content(10*1024*1024):
                     f.write(chunk)
         except Exception as e:
-            self.logger.exception(e)
+            self.logger.error(e)
             self.logger.error(f"Failed to download file {save_path}")
             if save_path.is_file():
                 os.remove(save_path)
