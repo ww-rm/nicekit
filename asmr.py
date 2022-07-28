@@ -1,6 +1,7 @@
 # -*- coding: UTF-8 -*-
 
 import logging
+import math
 import os
 from functools import wraps
 from pathlib import Path
@@ -10,6 +11,7 @@ from urllib.parse import urlsplit, urlunsplit
 
 import requests
 from requests.adapters import HTTPAdapter
+from tqdm import tqdm
 
 
 def empty_retry(times: int = 3, interval: float = 1):
@@ -204,12 +206,17 @@ class AsmrSite(XSession):
             self.logger.warning(f"Skip download exist file {save_path}")
             return True
 
+        res = self.head(url)
+        content_length = int(res.headers["Content-Length"])
+        chunk_size = 1*1024*1024
+        chunk_num = math.ceil(content_length / chunk_size)
+
         res = self.get(url, stream=True)
 
-        self.logger.warning(f"Downloading file {save_path}...")
+        self.logger.warning(f"Begin downloading file {save_path}...")
         try:
             with save_path.open("wb") as f:
-                for chunk in res.iter_content(10*1024*1024):
+                for chunk in tqdm(res.iter_content(chunk_size), save_path.name, chunk_num, True, unit="MB"):
                     f.write(chunk)
         except Exception as e:
             self.logger.error(e)
