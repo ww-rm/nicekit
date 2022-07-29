@@ -238,24 +238,36 @@ class AsmrSite(XSession):
             self.logger.error(f"Falied to download track {track_id}")
             return False
 
-        nodes = [{"children": track_info, "path": save_dir.joinpath(f"RJ{track_id}")}]
+        # 回溯法遍历
+        nodes = [{"children": track_info, "title": f"RJ{track_id}", "next": 0}]
         while nodes:
-            node = nodes.pop()
+            top = nodes[-1]
 
-            if node.get("children"):
-                for children in node["children"]:
-                    children["path"] = node["path"].joinpath(children["title"])
-                    nodes.append(children)
+            # 目录节点
+            if top.get("children"):
+                # 目录遍历完成, 弹出节点
+                if top["next"] >= len(top["children"]):
+                    nodes.pop()
+                # 进栈下一个子目录节点
+                else:
+                    child = top["children"][top["next"]]
+                    child["next"] = 0
+                    nodes.append(child)
+                    top["next"] += 1
+            # 文件节点
             else:
-                save_path = node["path"]
-                self.download_file(node["mediaDownloadUrl"], save_path)
+                save_path = save_dir.joinpath(*(e["title"] for e in nodes))
+                # print(save_path)
+                self.download_file(top["mediaDownloadUrl"], save_path)
+                nodes.pop()
+
 
 
 if __name__ == "__main__":
     print("声明: 所有资源均来自 https://www.asmr.one")
     print("="*50)
 
-    while not (rj_id := input("RJ号: ")):
+    while not (rj_id := input("RJ号: ").strip()):
         print("必须输入有效的RJ号!")
 
     def_name = "guest"
