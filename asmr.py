@@ -3,6 +3,7 @@
 import logging
 import math
 import os
+from argparse import ArgumentParser
 from functools import wraps
 from pathlib import Path
 from time import sleep
@@ -109,49 +110,12 @@ class XSession(requests.Session):
 class AsmrSite(XSession):
     """"""
 
-    HOSTS = {
-        "www.asmr.one": "104.26.5.137",
-        "api.asmr.one": "104.26.4.137"
-    }
-
     def __init__(self) -> None:
         super().__init__()
         self.headers.update({
             "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101 Firefox/102.0",
             "Referer": "https://www.asmr.one/"
         })
-        self.domain_fronting = False
-
-    @property
-    def domain_fronting(self):
-        return self.__domain_fronting
-
-    @domain_fronting.setter
-    def domain_fronting(self, value: bool):
-        self.__domain_fronting = value
-        if value:
-            self.logger.warning("Domain fronting is enabled.")
-
-    def request(self, method, url, *args, **kwargs) -> requests.Response:
-        if self.domain_fronting:
-            components = list(urlsplit(url))
-
-            # add Host header
-            if "headers" not in kwargs:
-                kwargs["headers"] = {"Host": components[1]}
-            else:
-                kwargs["headers"]["Host"] = components[1]
-
-            # replace netloc
-            components[1] = AsmrSite.HOSTS.get(components[1], components[1])
-            print(components[1])
-
-            # NOT verify
-            kwargs["verify"] = False
-
-            url = urlunsplit(components)
-
-        return super().request(method, url, *args, **kwargs)
 
     def login(self, name="guest", password="guest"):
         """"""
@@ -227,7 +191,7 @@ class AsmrSite(XSession):
 
         return True
 
-    def download_track(self, track_id, save_dir):
+    def download_track(self, track_id, save_dir, no_voice=False):
         """"""
 
         save_dir = Path(save_dir)
@@ -257,19 +221,31 @@ class AsmrSite(XSession):
             # 文件节点
             else:
                 save_path = save_dir.joinpath(*(e["title"] for e in nodes))
-                # print(save_path)
-                self.download_file(top["mediaDownloadUrl"], save_path)
+                if no_voice and save_path.suffix in [".mp3", ".wav"]:
+                    pass
+                else:
+                    # print(save_path)
+                    self.download_file(top["mediaDownloadUrl"], save_path)
                 nodes.pop()
-
 
 
 if __name__ == "__main__":
     print("声明: 所有资源均来自 https://www.asmr.one")
     print("="*50)
 
-    while not (rj_id := input("RJ号: ").strip()):
-        print("必须输入有效的RJ号!")
+    parser = ArgumentParser()
+    parser.add_argument("--no-voice", action="store_true")
+    args = parser.parse_args()
 
+    # RJ id
+    rj_id = input("RJ号: ").strip()
+    while not rj_id:
+        print("必须输入有效的RJ号!")
+        rj_id = input("RJ号: ").strip()
+
+    rj_id = rj_id.lower().strip("rj")
+
+    # name, password, save_dir
     def_name = "guest"
     def_pwd = "guest"
     def_save_dir = Path(".")
@@ -277,19 +253,18 @@ if __name__ == "__main__":
     name = input(f"用户名(可选)[{def_name}]: ").strip() or def_name
     password = input(f"登录密码(可选)[{def_name}]: ").strip() or def_name
     save_dir = input(f"保存位置(可选)[{def_save_dir.absolute()}]").strip() or def_save_dir
+
+    # proxy settings
     proxy = input(f"代理(可选, 例如 '127.0.0.1:10809'): ").strip()
 
-    rj_id = rj_id.lower().strip("rj")
-
     asmr_sess = AsmrSite()
-    # asmr_sess.domain_fronting = True
     if proxy:
         asmr_sess.proxies = {
             "http": proxy,
             "https": proxy
         }
     if asmr_sess.login(name, password):
-        asmr_sess.download_track(rj_id, save_dir)
+        asmr_sess.download_track(rj_id, save_dir, args.no_voice)
 
         print(f"RJ{rj_id} downloading done!")
         asmr_sess.logout()
