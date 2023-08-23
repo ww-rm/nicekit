@@ -82,13 +82,13 @@ def chrom_overlap(chrom1: List[Tuple[int, int, str]], chrom2: List[Tuple[int, in
         for i2, r2 in enumerate(chrom2):
             s2, e2, _ = r2
 
-            # [s1, e1, ..., s2, e2]
-            if e1 < s2:
-                break
-
             # [s2, e2, ..., s1, e1]
             if e2 < s1:
                 continue
+
+            # [s1, e1, ..., s2, e2]
+            if e1 < s2:
+                break
 
             s3 = max(s1, s2)
             e3 = min(e1, e2)
