@@ -1,3 +1,5 @@
+__version__ = "v1.0.1"
+
 __doc__ = """用于求两个序列文件的重叠区域
 
 参数:
@@ -62,8 +64,11 @@ def read_filedata(path, sep: str = "\t"):
 
 
 def write_filedata(data: Dict[str, List[Tuple[int, int, str]]], path):
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+
     chroms = sorted(data.keys())
-    with Path(path).open("w", encoding="utf8") as f:
+    with path.open("w", encoding="utf8") as f:
         for k in chroms:
             f.writelines(line for _, _, line in data[k])
 
@@ -127,8 +132,11 @@ def data_overlap(data1: Dict[str, List[Tuple[int, int, str]]], data2: Dict[str, 
 
 
 def write_overlapdata(data: Dict[str, List[Tuple[int, int]]], path, sep: str = "\t"):
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+
     chroms = sorted(data.keys())
-    with Path(path).open("w", encoding="utf8") as f:
+    with path.open("w", encoding="utf8") as f:
         for k in chroms:
             for s, e in data[k]:
                 line = f"{k}{sep}{s}{sep}{e}{sep}{e - s + 1}"
@@ -179,12 +187,12 @@ if __name__ == "__main__":
     if args.o1:
         path_overlap1 = Path(args.o1)
     else:
-        path_overlap1 = path1.with_stem(f"{path1.stem}.overlap")
+        path_overlap1 = path1.with_name(f"{path1.stem}.overlap{path1.suffix}")
 
     if args.o2:
         path_overlap2 = Path(args.o2)
     else:
-        path_overlap2 = path2.with_stem(f"{path2.stem}.overlap")
+        path_overlap2 = path2.with_name(f"{path2.stem}.overlap{path2.suffix}")
 
     path_overlap_both = Path(args.overlap)
 
