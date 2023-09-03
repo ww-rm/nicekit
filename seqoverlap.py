@@ -53,9 +53,7 @@ def read_filedata(path, sep: str = "\t"):
 
             row = (start, end, line)
 
-            if chrom not in data:
-                data[chrom] = []
-            data[chrom].append(row)
+            data.setdefault(chrom, []).append(row)
 
     for value in data.values():
         value.sort()
