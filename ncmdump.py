@@ -9,12 +9,12 @@ from io import BytesIO
 from os import PathLike
 from pathlib import Path
 from typing import List, Union
-from urllib import request as request
+from urllib import request
 
-import PIL.Image as Image
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import unpad
 from mutagen import flac, id3, mp3
+from PIL import Image
 from rich.progress import Progress, SpinnerColumn, TimeElapsedColumn
 
 
