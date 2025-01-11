@@ -43,6 +43,8 @@ def read_filedata(path, sep: str = "\t"):
 
     with Path(path).open("r", encoding="utf8") as f:
         for line in f:
+            if line.startswith("#"):
+                continue
             row = line.strip().split(sep)
             if len(row) < 3:
                 raise ValueError(f"{path}: Column count less than 3.")
@@ -53,7 +55,9 @@ def read_filedata(path, sep: str = "\t"):
 
             row = (start, end, line)
 
-            data.setdefault(chrom, []).append(row)
+            if chrom not in data:
+                data[chrom] = []
+            data[chrom].append(row)
 
     for value in data.values():
         value.sort()
