@@ -1,4 +1,4 @@
-__version__ = "v1.0.2"
+__version__ = "v1.0.3"
 
 __doc__ = """用于求两个序列文件的重叠区域
 
@@ -58,7 +58,7 @@ class SequenceOverlapFinder:
                 if line.startswith(self.comment_prefix):
                     continue
 
-                row = line.strip().split(self.sep)
+                row = line.rstrip("\n").split(self.sep)
                 if len(row) < 3:
                     raise ValueError(f"{path}: 数据少于 3 列.")
 
